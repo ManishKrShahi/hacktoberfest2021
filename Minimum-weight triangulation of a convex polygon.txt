@@ -1,0 +1,58 @@
+#include <iostream>
+#include <limits>
+#include <cmath>
+#include <algorithm>
+#include <vector>
+using namespace std;
+
+// Data structure to store a point in the Euclidean plane
+struct Point {
+	int x, y;
+};
+
+// Utility function to return the distance between two vertices in a 2D plane
+double dist(Point p1, Point p2)
+{
+	// The distance between vertices `(x1, y1)` and `(x2, y2)` is
+	// `√((x2 − x1) ^ 2 + (y2 − y1) ^ 2)`
+	return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+}
+
+// Function to calculate the weight of optimal triangulation of a convex polygon
+// represented by a given set of vertices `vertices[i…j]`
+double MWT(vector<Point> const &vertices, int i, int j)
+{
+	// If the polygon has less than 3 vertices, triangulation is not possible
+	if (j < i + 2) {
+		return 0;
+	}
+
+	// keep track of the total weight of the minimum-weight triangulation
+	// of `MWT(i, j)`
+	double cost = numeric_limits<double>::max();
+
+	// consider all possible triangles `ikj` within the polygon
+	for (int k = i + 1; k <= j - 1; k++)
+	{
+		// the weight of triangulation is the length of the perimeter of a triangle
+		double weight = dist(vertices[i], vertices[j]) +
+						dist(vertices[j], vertices[k]) +
+						dist(vertices[k], vertices[i]);
+
+		// choose vertex `k` that leads to the minimum total weight
+		cost = min(cost, weight + MWT(vertices, i, k) + MWT(vertices, k, j));
+	}
+
+	return cost;
+}
+
+int main()
+{
+	// vertices are given in clockwise order
+	vector<Point> vertices = { {0, 0}, {2, 0}, {2, 1}, {1, 2}, {0, 1} };
+
+	cout << "The weight of the optimal triangulation is "
+		 << MWT(vertices, 0, vertices.size() - 1) << endl;
+
+	return 0;
+}
